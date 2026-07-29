@@ -7,3 +7,6 @@ onnxruntime>=1.19.0
 praat-parselmouth==0.4.3
 pydub==0.25.1
 scikit-learn==1.7.1
+flask-sqlalchemy
+psycopg2-binary
+bcrypt

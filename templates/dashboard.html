@@ -353,43 +353,44 @@
             window.location.href = '/logout';
         }
 
-        // --- Local Storage History & Stats Management ---
-        function getHistory() {
-            const history = localStorage.getItem('neurovocal_history');
-            return history ? JSON.parse(history) : [];
-        }
-
-        function saveHistory(item) {
-            const history = getHistory();
-            history.unshift(item); // Add to beginning
-            localStorage.setItem('neurovocal_history', JSON.stringify(history));
-            loadDashboardStats();
-        }
-
-        function loadDashboardStats() {
-            const history = getHistory();
-            document.getElementById('stat-scans').innerText = history.length;
-            
-            if (history.length > 0) {
-                const latest = history[0];
-                document.getElementById('stat-latest-result').innerText = latest.label;
+        // --- Database History & Stats Management ---
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/history');
+                if (!response.ok) return;
+                const history = await response.json();
                 
-                // Populate Table
+                document.getElementById('stat-scans').innerText = history.length;
+                
                 const tbody = document.getElementById('history-table-body');
                 tbody.innerHTML = '';
                 
-                // Show up to 5 items
-                const displayItems = history.slice(0, 5);
-                displayItems.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.style.borderBottom = "1px solid var(--border-glass)";
-                    tr.innerHTML = `
-                        <td style="padding: 12px 10px; color: var(--text-secondary);">${item.date}</td>
-                        <td style="padding: 12px 10px; font-weight: 600; color: white;">${item.label}</td>
-                        <td style="padding: 12px 10px; text-align: right; color: var(--accent-cyan); font-weight: bold;">${item.confidence}%</td>
+                if (history.length > 0) {
+                    const latest = history[0];
+                    document.getElementById('stat-latest-result').innerText = latest.label;
+                    
+                    // Show up to 5 items
+                    const displayItems = history.slice(0, 5);
+                    displayItems.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.style.borderBottom = "1px solid var(--border-glass)";
+                        tr.innerHTML = `
+                            <td style="padding: 12px 10px; color: var(--text-secondary);">${item.date}</td>
+                            <td style="padding: 12px 10px; font-weight: 600; color: white;">${item.label}</td>
+                            <td style="padding: 12px 10px; text-align: right; color: var(--accent-cyan); font-weight: bold;">${item.confidence}%</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="3" style="padding: 20px; text-align: center; color: var(--text-muted);">No diagnostic history found. Select 'Voice Analyzer' to perform your first test.</td>
+                        </tr>
                     `;
-                    tbody.appendChild(tr);
-                });
+                    document.getElementById('stat-latest-result').innerText = '—';
+                }
+            } catch (e) {
+                console.error("Failed to load history:", e);
             }
         }
         loadDashboardStats();
@@ -487,14 +488,8 @@
                 document.getElementById("verdict-result").innerText = label;
                 document.getElementById("verdict-confidence").innerText = `${confidence}% Confidence`;
 
-                // Add to history
-                const dateObj = new Date();
-                const formattedDate = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                saveHistory({
-                    date: formattedDate,
-                    label: label,
-                    confidence: confidence
-                });
+                // Refresh history table and stats from database
+                loadDashboardStats();
 
                 // Render Chart
                 const labels = Object.keys(result.probs);
