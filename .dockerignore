@@ -1,0 +1,12 @@
+build/
+dist/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+*.spec
+.ipynb_checkpoints
+final_fixed.ipynb
+prepare_and_test.ps1
