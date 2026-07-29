@@ -3,6 +3,7 @@ FROM python:3.10-slim
 # Install system dependencies for audio decoding and parselmouth
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
+    ffmpeg \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
