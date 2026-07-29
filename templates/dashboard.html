@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - NeuroVocal AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Mobile header visible only on mobile -->
+    <div class="mobile-nav-header">
+        <div class="mobile-brand">NeuroVocal AI</div>
+        <button class="burger-btn" onclick="toggleMobileSidebar()">
+            <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside id="dashboard-sidebar" class="sidebar">
+            <div class="sidebar-logo">🗣️ NeuroVocal AI</div>
+            <nav>
+                <ul class="sidebar-menu">
+                    <li>
+                        <button id="btn-tab-home" class="menu-item-btn active" onclick="switchDashboardTab('home')">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+                            Portal Home
+                        </button>
+                    </li>
+                    <li>
+                        <button id="btn-tab-analyzer" class="menu-item-btn" onclick="switchDashboardTab('analyzer')">
+                            <svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                            Voice Analyzer
+                        </button>
+                    </li>
+                    <li>
+                        <button id="btn-tab-diseases" class="menu-item-btn" onclick="switchDashboardTab('diseases')">
+                            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Disease Info
+                        </button>
+                    </li>
+                    <li>
+                        <button id="btn-tab-guide" class="menu-item-btn" onclick="switchDashboardTab('guide')">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            Acoustic Guide
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile-info">
+                    <div class="user-avatar" id="avatar-letters">US</div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-display-name">Medical Professional</div>
+                        <div class="user-role">Diagnostician</div>
+                    </div>
+                </div>
+                <button class="menu-item-btn" onclick="logout()" style="color: var(--danger);">
+                    <svg viewBox="0 0 24 24" style="stroke: var(--danger);"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Body Workspace -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div class="dashboard-title-box">
+                    <h1 id="tab-heading-title">Diagnostics Dashboard</h1>
+                    <p id="tab-heading-subtitle">Overview of current clinical diagnostics and stats</p>
+                </div>
+            </header>
+
+            <!-- ===============================================================
+                 TAB 1: PORTAL HOME
+                 =============================================================== -->
+            <section id="tab-home" class="tab-content active">
+                <!-- Stat boxes -->
+                <div class="stats-container">
+                    <div class="stat-item glass-panel">
+                        <div class="stat-val" id="stat-scans">0</div>
+                        <div class="stat-lbl">Analyses Performed</div>
+                    </div>
+                    <div class="stat-item glass-panel">
+                        <div class="stat-val" id="stat-latest-result">—</div>
+                        <div class="stat-lbl">Latest Classification</div>
+                    </div>
+                    <div class="stat-item glass-panel">
+                        <div class="stat-val">100%</div>
+                        <div class="stat-lbl">Server Status</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="info-card glass-panel">
+                        <h3>Welcome to NeuroVocal AI</h3>
+                        <p>This medical intelligence tool utilizes state-of-the-art Acoustic Machine Learning models to analyze vocal features (such as jitter, shimmer, harmonic-to-noise ratio, and MFCC patterns) from vocal cord vibrations.</p>
+                        <p style="margin-top: 15px;">By examining these voice biomarkers, the system provides predictions regarding potential underlying vocal or neurological health disorders, serving as an effective preliminary screening utility.</p>
+                    </div>
+
+                    <div class="info-card glass-panel">
+                        <h3>How to Start screening</h3>
+                        <p>To analyze a patient's voice:</p>
+                        <ol style="margin-left: 20px; margin-top: 10px; color: var(--text-secondary); line-height: 1.6;">
+                            <li>Select the <strong>Voice Analyzer</strong> from the sidebar.</li>
+                            <li>Have the patient read the standardized text template out loud, or upload a pre-recorded audio file.</li>
+                            <li>Run the classification model to review probability graphs across different diagnostic categories.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Recent History Table -->
+                <div class="glass-panel" style="padding: 30px; margin-bottom: 35px;">
+                    <h3 style="font-family: var(--font-outfit); margin-bottom: 20px;">Recent Screening History</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;" id="history-table">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border-glass); color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">
+                                    <th style="padding: 12px 10px;">Date & Time</th>
+                                    <th style="padding: 12px 10px;">Classification Result</th>
+                                    <th style="padding: 12px 10px; text-align: right;">Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body" style="font-size: 0.95rem;">
+                                <!-- Will be filled by JS -->
+                                <tr>
+                                    <td colspan="3" style="padding: 20px; text-align: center; color: var(--text-muted);">No diagnostic history found. Select 'Voice Analyzer' to perform your first test.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===============================================================
+                 TAB 2: VOICE ANALYZER
+                 =============================================================== -->
+            <section id="tab-analyzer" class="tab-content">
+                <div class="analyzer-layout">
+                    <!-- Left: Control panel -->
+                    <div class="record-panel glass-panel">
+                        <div class="passage-box">
+                            <div class="passage-title">Standardized Vocal Reading Passage</div>
+                            <div class="passage-body">
+                                "Please read the following passage clearly and at a normal pace: The sun in the sky shone down brightly, casting a warm glow over the rolling green hills. A gentle breeze rustled the leaves of the tall oak trees, and the birds sang a cheerful melody. It was a perfect day for a long walk in the park, enjoying the quiet beauty of nature."
+                            </div>
+                        </div>
+
+                        <div class="record-controls">
+                            <button id="start" class="btn-ctrl btn-start">
+                                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                                Record Voice
+                            </button>
+                            <button id="stop" class="btn-ctrl btn-stop" disabled>
+                                <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect></svg>
+                                Stop
+                            </button>
+                            <button id="upload-button" class="btn-ctrl btn-upload">
+                                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                Upload Audio
+                            </button>
+                            <input type="file" id="upload-audio" accept="audio/*" style="display: none;">
+                        </div>
+
+                        <div id="status" class="status-tracker">Awaiting vocal input...</div>
+
+                        <div class="audio-player-container">
+                            <audio id="audioPlayback" controls></audio>
+                        </div>
+
+                        <button id="analyze" class="btn-analyze" disabled>Execute Model Analysis</button>
+                    </div>
+
+                    <!-- Right: Results dashboard -->
+                    <div id="results-container" class="record-panel glass-panel">
+                        <!-- Placeholder state -->
+                        <div id="results-placeholder" class="results-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                            <h3>Awaiting Analysis</h3>
+                            <p>Once voice recording or upload is completed, run the analysis model to view classifications.</p>
+                        </div>
+
+                        <!-- Verdict Card -->
+                        <div id="results-data" style="display: none;">
+                            <div class="result-verdict-box">
+                                <div class="verdict-label">Diagnostic Classification</div>
+                                <div class="verdict-value" id="verdict-result">Parkinson's Disease</div>
+                                <div class="verdict-confidence" id="verdict-confidence">94.3% Confidence</div>
+                            </div>
+                            
+                            <h3 style="font-family: var(--font-outfit); margin-bottom: 20px; font-size: 1.15rem;">Categorical Class Probabilities</h3>
+                            <canvas id="probChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===============================================================
+                 TAB 3: DISEASES DECK
+                 =============================================================== -->
+            <section id="tab-diseases" class="tab-content">
+                <div class="disease-deck">
+                    <div class="disease-card glass-panel">
+                        <h3>Parkinson's Disease (PD) <span class="disease-badge badge-neurological">Neurological</span></h3>
+                        <p>Parkinson's disease is a neurodegenerative disorder that impacts motor systems and dopamine-producing neurons. Early vocal symptoms—collectively known as hypokinetic dysarthria—include reduced loudness, vocal tremors, breathiness, and a monotone speech pattern.</p>
+                        <strong>Common Acoustic Biomarkers:</strong>
+                        <ul class="symptoms-list">
+                            <li>Reduced vocal cord stability (High Jitter)</li>
+                            <li>Unstable vocal intensity (High Shimmer)</li>
+                            <li>Monotonic pitch frequency variations</li>
+                        </ul>
+                    </div>
+
+                    <div class="disease-card glass-panel">
+                        <h3>Alzheimer's Disease (AD) <span class="disease-badge badge-neurological">Neurological</span></h3>
+                        <p>Alzheimer's is a progressive cognitive illness that destroys memory and mental function. In its early stages, it significantly impacts language processing, leading to word-finding pauses, slower speech articulation rates, and simplified grammar.</p>
+                        <strong>Common Acoustic Biomarkers:</strong>
+                        <ul class="symptoms-list">
+                            <li>Higher silent pause frequencies and durations</li>
+                            <li>Reduced articulation speed and flat prosody</li>
+                            <li>Loss of conversational pitch rhythm</li>
+                        </ul>
+                    </div>
+
+                    <div class="disease-card glass-panel">
+                        <h3>Clinical Stress <span class="disease-badge badge-vocal">Psychological / Somatic</span></h3>
+                        <p>Acute or chronic psychological stress increases muscle tension throughout the body, including the laryngeal muscles. This somatic response directly impacts the voice, causing high vocal strain, elevated pitch, and trembling speech.</p>
+                        <strong>Common Acoustic Biomarkers:</strong>
+                        <ul class="symptoms-list">
+                            <li>Elevated fundamental frequency (High Mean F0)</li>
+                            <li>Increased subglottic tension and vocal instability</li>
+                            <li>Vocal tremor and breathy voice dropouts</li>
+                        </ul>
+                    </div>
+
+                    <div class="disease-card glass-panel">
+                        <h3>Clinical Depression <span class="disease-badge badge-vocal">Psychological</span></h3>
+                        <p>Depression leads to psychomotor slowing, which reflects clearly in vocal acoustics as flat, dull, breathy, and monotone speech (often referred to as 'flat affect' or vocal flatness).</p>
+                        <strong>Common Acoustic Biomarkers:</strong>
+                        <ul class="symptoms-list">
+                            <li>Flat fundamental frequency (Low Std Dev F0)</li>
+                            <li>Reduced overall speech rate and prolonged pauses</li>
+                            <li>Muted spectral resonance and quietness</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===============================================================
+                 TAB 4: ACOUSTIC GUIDE
+                 =============================================================== -->
+            <section id="tab-guide" class="tab-content">
+                <div class="guide-steps">
+                    <div class="guide-step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Isolate Environmental Noise</h4>
+                            <p>Ensure the patient is seated in a quiet room. Microphones pick up low-frequency hums from air conditioners, computer fans, and wall echo reflection, which can negatively bias acoustic jitter calculations.</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Microphone Placement</h4>
+                            <p>Maintain a distance of approximately 10 to 15 centimeters (4 to 6 inches) between the patient's mouth and the microphone. Direct puffing/breathing on the microphone element creates high-amplitude bass spikes that distort mel spectrograms.</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>Vocal Tone & Pace</h4>
+                            <p>Instruct the patient to read the text in a comfortable, relaxed, monotone voice. Artificial whispering or forced speaking dynamics alter fundamental frequency (F0) trends, which could skew machine learning classifications.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let mediaRecorder, audioChunks, uploadedFile = null;
+        let myChart;
+
+        // Fetch User Info on Load
+        async function fetchUserInfo() {
+            try {
+                const res = await fetch('/api/user');
+                const data = await res.json();
+                if (data.username) {
+                    document.getElementById('user-display-name').innerText = data.username;
+                    // Get first two characters for avatar
+                    const parts = data.username.split(' ');
+                    let initials = data.username.substring(0, 2).toUpperCase();
+                    if (parts.length > 1) {
+                        initials = (parts[0][0] + parts[1][0]).toUpperCase();
+                    }
+                    document.getElementById('avatar-letters').innerText = initials;
+                }
+            } catch (e) {
+                console.error("Failed to load user info:", e);
+            }
+        }
+        fetchUserInfo();
+
+        // Switch Dashboard Tab
+        function switchDashboardTab(tabId) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+
+            // Remove active style from menu buttons
+            const buttons = document.querySelectorAll('.menu-item-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Set active class on navbar button
+            document.getElementById(`btn-tab-${tabId}`).classList.add('active');
+
+            // Close mobile sidebar if open
+            document.getElementById('dashboard-sidebar').classList.remove('open');
+
+            // Update title
+            const headingTitle = document.getElementById('tab-heading-title');
+            const headingSubtitle = document.getElementById('tab-heading-subtitle');
+
+            if (tabId === 'home') {
+                headingTitle.innerText = "Diagnostics Dashboard";
+                headingSubtitle.innerText = "Overview of current clinical diagnostics and stats";
+                loadDashboardStats();
+            } else if (tabId === 'analyzer') {
+                headingTitle.innerText = "Vocal Diagnostics Workspace";
+                headingSubtitle.innerText = "Record patient vocal audio and run machine learning models";
+            } else if (tabId === 'diseases') {
+                headingTitle.innerText = "Clinical Illness Deck";
+                headingSubtitle.innerText = "Reference details and acoustic biomarkers of pathologies";
+            } else if (tabId === 'guide') {
+                headingTitle.innerText = "Acoustic Collection Guidelines";
+                headingSubtitle.innerText = "Clinical standards for high-fidelity vocal data collection";
+            }
+        }
+
+        // Toggle Sidebar on mobile
+        function toggleMobileSidebar() {
+            document.getElementById('dashboard-sidebar').classList.toggle('open');
+        }
+
+        // Handle Logout
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        // --- Local Storage History & Stats Management ---
+        function getHistory() {
+            const history = localStorage.getItem('neurovocal_history');
+            return history ? JSON.parse(history) : [];
+        }
+
+        function saveHistory(item) {
+            const history = getHistory();
+            history.unshift(item); // Add to beginning
+            localStorage.setItem('neurovocal_history', JSON.stringify(history));
+            loadDashboardStats();
+        }
+
+        function loadDashboardStats() {
+            const history = getHistory();
+            document.getElementById('stat-scans').innerText = history.length;
+            
+            if (history.length > 0) {
+                const latest = history[0];
+                document.getElementById('stat-latest-result').innerText = latest.label;
+                
+                // Populate Table
+                const tbody = document.getElementById('history-table-body');
+                tbody.innerHTML = '';
+                
+                // Show up to 5 items
+                const displayItems = history.slice(0, 5);
+                displayItems.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = "1px solid var(--border-glass)";
+                    tr.innerHTML = `
+                        <td style="padding: 12px 10px; color: var(--text-secondary);">${item.date}</td>
+                        <td style="padding: 12px 10px; font-weight: 600; color: white;">${item.label}</td>
+                        <td style="padding: 12px 10px; text-align: right; color: var(--accent-cyan); font-weight: bold;">${item.confidence}%</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+        loadDashboardStats();
+
+        // =====================================================================
+        // AUDIO RECORDING & PREDICTION LOGIC
+        // =====================================================================
+        document.getElementById("start").addEventListener("click", async () => {
+            document.getElementById("status").innerText = "Recording... Please read the passage.";
+            document.getElementById("audioPlayback").src = "";
+            document.getElementById("analyze").disabled = true;
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+                    document.getElementById("audioPlayback").src = URL.createObjectURL(audioBlob);
+                    document.getElementById("analyze").disabled = false;
+                    document.getElementById("status").innerText = "Recording stopped. Ready for analysis.";
+                    uploadedFile = null;
+                };
+                mediaRecorder.start();
+                document.getElementById("start").disabled = true;
+                document.getElementById("stop").disabled = false;
+                document.getElementById("upload-button").disabled = true;
+            } catch (err) {
+                document.getElementById("status").innerText = "Error: " + err.message;
+            }
+        });
+
+        document.getElementById("stop").addEventListener("click", () => {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            document.getElementById("stop").disabled = true;
+            document.getElementById("start").disabled = false;
+            document.getElementById("upload-button").disabled = false;
+        });
+
+        document.getElementById("upload-button").addEventListener("click", () => {
+            document.getElementById("upload-audio").click();
+        });
+
+        document.getElementById("upload-audio").addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                uploadedFile = file;
+                document.getElementById("audioPlayback").src = URL.createObjectURL(file);
+                document.getElementById("analyze").disabled = false;
+                document.getElementById("status").innerText = `File: ${file.name}. Ready.`;
+                document.getElementById("start").disabled = true;
+                document.getElementById("stop").disabled = true;
+            }
+        });
+
+        document.getElementById("analyze").addEventListener("click", async () => {
+            let audioToAnalyze;
+            if (uploadedFile) {
+                audioToAnalyze = uploadedFile;
+            } else if (audioChunks && audioChunks.length > 0) {
+                audioToAnalyze = new Blob(audioChunks, { type: "audio/webm" });
+            } else {
+                document.getElementById("status").innerText = "Error: No audio data.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("audio", audioToAnalyze, uploadedFile ? uploadedFile.name : "recording.webm");
+
+            document.getElementById("status").innerText = "Analyzing audio waveforms...";
+            document.getElementById("analyze").disabled = true;
+
+            try {
+                const response = await fetch("/predict", { method: "POST", body: formData });
+                const result = await response.json();
+
+                document.getElementById("analyze").disabled = false;
+                if (result.error) {
+                    document.getElementById("status").innerText = "Error: " + result.error;
+                    return;
+                }
+
+                document.getElementById("status").innerText = "Analysis complete!";
+                
+                // Show Results UI
+                document.getElementById("results-placeholder").style.display = "none";
+                document.getElementById("results-data").style.display = "block";
+
+                const label = result.label;
+                const confidence = (result.confidence * 100).toFixed(1);
+                
+                document.getElementById("verdict-result").innerText = label;
+                document.getElementById("verdict-confidence").innerText = `${confidence}% Confidence`;
+
+                // Add to history
+                const dateObj = new Date();
+                const formattedDate = dateObj.toLocaleDateString() + " " + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                saveHistory({
+                    date: formattedDate,
+                    label: label,
+                    confidence: confidence
+                });
+
+                // Render Chart
+                const labels = Object.keys(result.probs);
+                const data = Object.values(result.probs).map(p => (p * 100).toFixed(1));
+                const ctx = document.getElementById("probChart").getContext("2d");
+
+                if (myChart) {
+                    myChart.destroy();
+                }
+
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Probability (%)',
+                            data: data,
+                            backgroundColor: ['#3b82f6', '#06b6d4', '#ec4899', '#f59e0b'],
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#9ca3af' }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { color: '#9ca3af' },
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                document.getElementById("analyze").disabled = false;
+                document.getElementById("status").innerText = "Analysis failed. Please try again.";
+            }
+        });
+    </script>
+</body>
+</html>
