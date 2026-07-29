@@ -1,6 +1,6 @@
 Flask==2.3.2
 gunicorn==20.1.0
-numpy==1.26.0  # <-- CHANGE THIS LINE TO A HIGHER VERSION
+numpy>=2.0.0
 librosa==0.10.1
 joblib==1.3.2
 tensorflow==2.20.0
