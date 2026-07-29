@@ -6,7 +6,7 @@ from flask import Flask, request, render_template, jsonify
 import numpy as np
 import librosa
 import joblib
-import tensorflow as tf
+import onnxruntime as ort
 import parselmouth
 from parselmouth.praat import call
 from pydub import AudioSegment
@@ -46,7 +46,10 @@ def load_models():
         app.logger.info(f"Attempting to load models from the '{MODEL_DIR}' directory...")
         
         # Load all the necessary model and pre-processing files
-        crnn_model = tf.keras.models.load_model(os.path.join(MODEL_DIR, 'crnn_model.h5'))
+        opts = ort.SessionOptions()
+        opts.intra_op_num_threads = 1
+        opts.inter_op_num_threads = 1
+        crnn_model = ort.InferenceSession(os.path.join(MODEL_DIR, 'crnn_model.onnx'), sess_options=opts)
         rf_model = joblib.load(os.path.join(MODEL_DIR, 'random_forest_model.joblib'))
         scaler = joblib.load(os.path.join(MODEL_DIR, 'audio_scaler.joblib'))
         label_encoder = joblib.load(os.path.join(MODEL_DIR, 'label_encoder.joblib'))
@@ -135,8 +138,10 @@ def predict():
             pad_width = max_len - mel_spec_db.shape[1]
             mel_spec_db = np.pad(mel_spec_db, ((0,0),(0,pad_width)), mode='constant')
         
-        X_crnn = np.expand_dims(mel_spec_db, axis=(0, 3))
-        crnn_probs = crnn_model.predict(X_crnn, verbose=0)[0]
+        X_crnn = np.expand_dims(mel_spec_db, axis=0).astype(np.float32)
+        ort_inputs = {crnn_model.get_inputs()[0].name: X_crnn}
+        ort_outs = crnn_model.run(None, ort_inputs)
+        crnn_probs = ort_outs[0][0]
 
         # --- Ensemble and Final Result ---
         ensemble_probs = (rf_probs + crnn_probs) / 2.0

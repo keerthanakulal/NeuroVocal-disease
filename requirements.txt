@@ -3,7 +3,7 @@ gunicorn==20.1.0
 numpy>=2.0.0
 librosa==0.10.1
 joblib==1.3.2
-tensorflow==2.20.0
+onnxruntime>=1.19.0
 praat-parselmouth==0.4.3
 pydub==0.25.1
 scikit-learn==1.7.1
