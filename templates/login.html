@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gateway - NeuroVocal AI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card glass-panel">
+            <div class="brand-header">
+                <div class="brand-logo">NeuroVocal AI</div>
+                <div class="brand-tagline">Advanced Vocal Health Diagnostics Gateway</div>
+            </div>
+
+            <!-- Tabs to toggle Login / Registration -->
+            <div class="auth-tabs">
+                <button type="button" id="tab-login" class="auth-tab-btn active" onclick="switchTab('login')">Sign In</button>
+                <button type="button" id="tab-register" class="auth-tab-btn" onclick="switchTab('register')">Register</button>
+            </div>
+
+            <!-- Error alert box -->
+            <div id="error-box" class="alert-message"></div>
+
+            <!-- Login Form -->
+            <form id="form-login" action="/login" method="POST" onsubmit="handleAuthSubmit(event, 'login')">
+                <div class="form-group">
+                    <label class="form-label" for="login-email">Email Address</label>
+                    <input type="email" id="login-email" name="email" class="input-control" placeholder="doctor@hospital.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" class="input-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">Authenticate</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" action="/register" method="POST" style="display: none;" onsubmit="handleAuthSubmit(event, 'register')">
+                <div class="form-group">
+                    <label class="form-label" for="reg-name">Full Name</label>
+                    <input type="text" id="reg-name" name="name" class="input-control" placeholder="Dr. Sarah Connor" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="reg-email">Email Address</label>
+                    <input type="email" id="reg-email" name="email" class="input-control" placeholder="sarah.connor@medical.org" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="reg-password">Create Password</label>
+                    <input type="password" id="reg-password" name="password" class="input-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">Register Account</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(mode) {
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const formLogin = document.getElementById('form-login');
+            const formRegister = document.getElementById('form-register');
+            const errorBox = document.getElementById('error-box');
+
+            errorBox.style.display = 'none';
+
+            if (mode === 'login') {
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                formLogin.style.display = 'block';
+                formRegister.style.display = 'none';
+            } else {
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+                formRegister.style.display = 'block';
+                formLogin.style.display = 'none';
+            }
+        }
+
+        async function handleAuthSubmit(event, type) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            const errorBox = document.getElementById('error-box');
+            
+            errorBox.style.display = 'none';
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Authenticated successfully, redirect to dashboard
+                    window.location.href = '/dashboard';
+                } else {
+                    errorBox.innerText = result.error || 'Authentication failed. Please try again.';
+                    errorBox.style.display = 'block';
+                }
+            } catch (err) {
+                errorBox.innerText = 'Network error occurred. Please check your connection.';
+                errorBox.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
