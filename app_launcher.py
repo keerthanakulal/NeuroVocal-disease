@@ -77,18 +77,21 @@ def predict():
     if file.filename == '':
         return jsonify({'error': 'No file selected.'}), 400
 
+    import tempfile
+    
+    # Save the uploaded file to a temporary file
+    temp_wav_fd, temp_wav_path = tempfile.mkstemp(suffix='.wav')
+    os.close(temp_wav_fd)
+    
     try:
-        # --- In-Memory Audio Processing ---
+        # --- Audio Transcoding using pydub ---
         audio_buffer = BytesIO(file.read())
         sound = AudioSegment.from_file(audio_buffer)
-        
-        wav_buffer = BytesIO()
-        sound.export(wav_buffer, format='wav')
-        wav_buffer.seek(0)
+        sound.export(temp_wav_path, format='wav')
 
         # --- Feature Extraction ---
-        y, sr = librosa.load(wav_buffer, sr=44100)
-        sound_obj = parselmouth.Sound(y, sampling_frequency=sr)
+        y, sr = librosa.load(temp_wav_path, sr=44100)
+        sound_obj = parselmouth.Sound(temp_wav_path)
         
         features = {}
         try:
@@ -97,14 +100,14 @@ def predict():
             features['shimmer_local'] = call([sound_obj, pp], "Get shimmer (local)", 0, 0, 0.0001, 0.02, 1.3, 1.6)
             harmonicity = call(sound_obj, "To Harmonicity (cc)", 0.01, 75, 0.1, 1.0)
             features['hnr'] = call(harmonicity, "Get mean", 0, 0)
-            pitch = sound_obj.to_pitch()
+            pitch = sound_obj.to_pitch(None, 75, 600)
             intensity = sound_obj.to_intensity()
             features['mean_f0'] = call(pitch, "Get mean", 0, 0, "Hertz")
-            features['std_f0'] = call(pitch, "Get standard deviation", 0, 0, "Hertz")
+            features['std_dev_f0'] = call(pitch, "Get standard deviation", 0, 0, "Hertz")
             features['mean_intensity'] = call(intensity, "Get mean", 0, 0, "energy")
         except Exception as praat_error:
             app.logger.warning(f"Praat feature extraction failed: {praat_error}. Defaulting acoustic features to 0.")
-            features.update({'jitter_local':0, 'shimmer_local':0, 'hnr':0, 'mean_f0':0, 'std_f0':0, 'mean_intensity':0})
+            features.update({'jitter_local':0, 'shimmer_local':0, 'hnr':0, 'mean_f0':0, 'std_dev_f0':0, 'mean_intensity':0})
             
         # Extract Librosa features
         mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
@@ -153,6 +156,13 @@ def predict():
     except Exception as e:
         app.logger.error(f"An unexpected error occurred during prediction: {e}", exc_info=True)
         return jsonify({'error': 'An internal error occurred while processing the audio file.'}), 500
+    finally:
+        # Clean up temporary WAV file
+        try:
+            if os.path.exists(temp_wav_path):
+                os.remove(temp_wav_path)
+        except Exception as cleanup_error:
+            app.logger.warning(f"Failed to clean up temporary file {temp_wav_path}: {cleanup_error}")
 
 def open_browser():
     """Open web browser after a delay"""
